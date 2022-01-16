@@ -36,8 +36,11 @@ type headBranchDetector struct {
 func newGit(b []byte) (Driver, error) {
 	var d GitDriver
 
-	if b != nil {
+	if b == nil {
+        log.print("[DEBUG-407] JSON payload is nil.")
+    } else {
 		if err := json.Unmarshal(b, &d); err != nil {
+            log.Printf("[DEBUG-407] Error parsing JSON: %v", err)
 			return nil, err
 		}
 	}
@@ -114,15 +117,21 @@ func (g *GitDriver) Pull(dir string) (string, error) {
 
 func (g *GitDriver) targetRef(dir string) string {
 	var targetRef string
+
 	if g.Ref != "" {
+        log.Print("[DEBUG-407] We've got a winner!")
 		targetRef = g.Ref
 	} else if g.DetectRef {
+        log.Print("[DEBUG-407] No ref explicitly set, let's autodetect")
 		targetRef = g.refDetetector.detectRef(dir)
 	}
 
 	if targetRef == "" {
+        log.Printf("[DEBUG-407] targetRef is an empty string, defaulting to %s", defaultRef)
 		targetRef = defaultRef
 	}
+
+    log.Printf("[DEBUG-407] targetRef final value is %s", targetRef)
 
 	return targetRef
 }
